@@ -1,4 +1,4 @@
-package com.example.notaspam2.ui.notifications;
+package com.example.notaspam2.ui.list;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
