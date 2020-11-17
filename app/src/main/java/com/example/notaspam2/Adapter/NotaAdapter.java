@@ -4,52 +4,48 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
+import android.widget.ListView;
 import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.example.notaspam2.Models.NotaModel;
 import com.example.notaspam2.R;
 
 import java.util.ArrayList;
+import java.util.List;
 
-public class NotaAdapter extends BaseAdapter {
+public class NotaAdapter extends ArrayAdapter<NotaModel> {
 
+    private ArrayList<NotaModel> model;
     private Context context;
-    private ArrayList<NotaModel> modelArrayList;
+    private int resourceLayout;
 
-    public NotaAdapter(Context context, ArrayList<NotaModel> modelArrayList) {
+    public NotaAdapter(@NonNull Context context, int resource, @NonNull ArrayList<NotaModel> objects) {
+        super(context, resource, objects);
+        this.model = objects;
         this.context = context;
-        this.modelArrayList = modelArrayList;
+        this.resourceLayout = resource;
     }
 
+    @NonNull
     @Override
-    public int getCount() {
-        return modelArrayList.size();
-    }
+    public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
+            View view = convertView;
+            if (view == null){
+                view = LayoutInflater.from(context).inflate(R.layout.list_nota_model, null);
+            }
 
-    @Override
-    public NotaModel getItem(int position) {
-        return modelArrayList.get(position);
-    }
+            NotaModel notaModel = model.get(position);
 
-    @Override
-    public long getItemId(int position) {
-        return 0;
-    }
+            TextView txt_titulo_list_view = view.findViewById(R.id.txt_titulo_list_view);
+            TextView description = view.findViewById(R.id.txt_descripcion_list_view);
+            txt_titulo_list_view.setText(notaModel.getTitle());
+            description.setText(notaModel.getDescription());
 
-    @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
-
-        if (convertView==null){
-            LayoutInflater layoutInflater = LayoutInflater.from(this.context);
-            convertView = layoutInflater.inflate(R.layout.list_nota_model, parent, true);
-        }
-
-        TextView title = convertView.findViewById(R.id.txt_titulo_list_view),
-                description = convertView.findViewById(R.id.txt_descripcion_list_view);
-
-        title.setText(getItem(position).getTitle());
-        description.setText(getItem(position).getDescription());
-        return convertView;
+            return view;
     }
 }
