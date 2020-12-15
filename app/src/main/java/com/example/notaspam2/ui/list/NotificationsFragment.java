@@ -1,10 +1,12 @@
 package com.example.notaspam2.ui.list;
 
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -17,6 +19,7 @@ import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.example.notaspam2.Adapter.NotaAdapter;
+import com.example.notaspam2.DetailActivity;
 import com.example.notaspam2.Models.NotaModel;
 import com.example.notaspam2.R;
 import com.example.notaspam2.connection.FireBaseConnection;
@@ -43,7 +46,7 @@ public class NotificationsFragment extends Fragment {
 
     private Query query;
 
-    private final String COLLECTION_NAME = "notas";
+    public static String COLLECTION_NAME = "notas";
     ListView ListViewNotas;
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -65,7 +68,23 @@ public class NotificationsFragment extends Fragment {
         model = new NotaModel();
         db = FireBaseConnection.ConnectionFirestore();
         collectionReference = db.collection(COLLECTION_NAME);
+
+        ListViewNotas.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                goToDetail(String.valueOf(NotaList.get(position).getFbId()), String.valueOf(NotaList.get(position).getTitle()), String.valueOf(NotaList.get(position).getDescription()));
+            }
+        });
     }
+
+    private void goToDetail(String id, String title, String description) {
+        Intent intent = new Intent(getContext(), DetailActivity.class);
+        intent.putExtra("id", id);
+        intent.putExtra("title", title);
+        intent.putExtra("description", description);
+        startActivity(intent);
+    }
+
 
     private void getNotas(){
         if (collectionReference!=null){
@@ -76,8 +95,9 @@ public class NotificationsFragment extends Fragment {
                             if (task.isSuccessful()){
                                 if (task.getResult() != null){
                                     NotaList = new ArrayList<>();
-                                    for (QueryDocumentSnapshot snapshot: task.getResult()){
-                                        model = snapshot.toObject(NotaModel.class);
+                                    for (QueryDocumentSnapshot document: task.getResult()){
+                                        model = document.toObject(NotaModel.class);
+                                        model.setFbId(document.getId());
                                         NotaList.add(model);
                                     }
 
@@ -101,8 +121,10 @@ public class NotificationsFragment extends Fragment {
     }
 
     private void paintNotas(ArrayList<NotaModel> notaList) {
-        adapter = new NotaAdapter(getContext(), R.layout.list_nota_model, notaList);
-        ListViewNotas.setAdapter(adapter);
+        if (notaList.size()>=1){
+            adapter = new NotaAdapter(getContext(), R.layout.list_nota_model, notaList);
+            ListViewNotas.setAdapter(adapter);
+        }
     }
 
 
